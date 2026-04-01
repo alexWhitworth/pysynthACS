@@ -1,0 +1,14 @@
+/Users/awhitworth/github_projects/pysynthACS/target/release/deps/serde-df5cd4ad0581c5c4.d: /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/awhitworth/github_projects/pysynthACS/target/release/build/serde-c73b5645946a4c6b/out/private.rs
+
+/Users/awhitworth/github_projects/pysynthACS/target/release/deps/libserde-df5cd4ad0581c5c4.rlib: /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/awhitworth/github_projects/pysynthACS/target/release/build/serde-c73b5645946a4c6b/out/private.rs
+
+/Users/awhitworth/github_projects/pysynthACS/target/release/deps/libserde-df5cd4ad0581c5c4.rmeta: /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/awhitworth/github_projects/pysynthACS/target/release/build/serde-c73b5645946a4c6b/out/private.rs
+
+/Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/awhitworth/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/awhitworth/github_projects/pysynthACS/target/release/build/serde-c73b5645946a4c6b/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/awhitworth/github_projects/pysynthACS/target/release/build/serde-c73b5645946a4c6b/out
