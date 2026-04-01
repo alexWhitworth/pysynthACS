@@ -24,66 +24,39 @@ This document outlines the architectural plan for migrating the `synthACS` R pac
 - **FP (Data Transformation)**: Pure functions handle data cleaning, renaming, and mathematical transformations. This ensures testability and prevents side effects.
 - **Immutability**: Frozen `dataclasses` store configurations (`PullConfig`) and resulting datasets (`AcsResult`).
 
-## 4. Phase 1: Data Migration & ACS Puller Refactor
+## 4. Phase 1: Data Migration & ACS Puller Refactor [COMPLETED]
 
 ### 4.1. Data Migration (`data/` folder)
-The static data currently stored as `.rda` files in `synthACS/data/` will be migrated to `pysynthACS/src/pysynthacs/data/`.
+The static data currently stored as `.rda` files in `synthACS/data/` has been migrated to `pysynthACS/src/pysynthacs/data/`.
 
-- **Format**: All `.rda` files will be converted to `.parquet`.
-- **Engine**: `pyarrow` or `fastparquet` via `pandas.to_parquet()`.
-- **Access**: A data-loader module (`pysynthacs.data.loaders`) will provide functional access to these datasets.
+- **Format**: All `.rda` files were converted to `.parquet`.
+- **Status**: [DONE]
 
 ### 4.2. ACS Puller Refactor (`pull_*.R`)
-The `pull_*.R` functions will be refactored into a class hierarchy using the following structure:
+The `pull_*.R` functions are being refactored into a class hierarchy.
 
-#### Configuration & Results (Frozen Dataclasses)
-```python
-@dataclass(frozen=True)
-class PullConfig:
-    year: int
-    span: int
-    geography: Dict[str, Any]
-    table_ids: List[str]
-    api_key: Optional[str] = None
+- **Status**: `BasePuller` and `PopulationPuller` implemented. [DONE]
 
-@dataclass(frozen=True)
-class AcsResult:
-    estimates: pd.DataFrame
-    standard_errors: pd.DataFrame
-    metadata: Dict[str, Any]
-    config: PullConfig
-```
+## 5. Phase 2: High-Performance Optimization Engine [IN PROGRESS]
 
-#### Puller Hierarchy
-- `BasePuller`: Abstract base class handling API authentication and raw `censusdis` downloads.
-- `PopulationPuller`: Fetches age, race, and basic demographic tables (B01001, B02001, etc.).
-- `EducationPuller`: Fetches educational attainment and enrollment (B14001, B15001, etc.).
-- `IncomePuller`: Fetches household and individual income data.
+### 5.1. Rust Backend (`pysynthacs-core`) [IMPLEMENTED]
+The simulated annealing logic has been moved to a Rust extension using `PyO3` and `maturin`.
 
-#### Functional Transformations
-Each puller will delegate data cleaning to a set of pure functions in a `transforms` module.
+- **Current Status**: Core logic implemented in `src/lib.rs`.
+- **Features**: Scale-agnostic fractional jumps, Re-annealing temperature spikes, Delta-TAE optimization.
+- **Default Settings**: `max_iter=50,000`.
 
-## 5. Phase 2: High-Performance Optimization Engine
-
-### 5.1. Rust Backend (`pysynthacs-core`)
-The simulated annealing logic will be moved to a Rust extension using `PyO3` and `maturin`.
-
-- **Engine**: Implement the Metropolis-Hastings loop in Rust for thread-safe, high-speed optimization.
-- **Objective Function**: `calculate_tae` implemented in Rust, optimized for incremental updates (only calculating the delta from swapped individuals).
-- **Concurrency**: Use `rayon` to parallelize optimization across multiple geographies simultaneously.
-
-### 5.2. Attribute Mapping & Disaggregation
+### 5.2. Attribute Mapping & Disaggregation [PENDING]
 - **Integer Encoding**: Python-side pre-processing to convert categorical Census labels into integer indices for the Rust engine.
-- **Numba/NumPy Helpers**: Use Numba for lightweight data preparation tasks that don't require the full Rust toolchain.
 
-## 6. Phase 3: Synthetic Data Structures & API
+## 6. Phase 3: Synthetic Data Structures & API [PENDING]
 Refactoring the complex R S4 classes into modern Python structures.
 
 - **Data Containers**: Use `dataclasses` or `attrs` for `MacroData`, `MicroData`, and `SyntheticPopulation`.
 - **API Design**: Create a high-level `SyntheticGenerator` class that orchestrates the pullers from Phase 1 and the optimization engine from Phase 2.
 - **Vectorization**: Store multi-dimensional census data using `xarray` or consolidated `pandas` structures.
 
-## 7. Phase 4: Validation, Visualization & Performance
+## 7. Phase 4: Validation, Visualization & Performance [PENDING]
 Ensuring the tool is robust and provides diagnostic capabilities.
 
 - **Diagnostics**: Porting `calculate_TAE` (Total Absolute Error) and `plot_TAEpath`.
@@ -91,10 +64,30 @@ Ensuring the tool is robust and provides diagnostic capabilities.
 - **Benchmarking**: Comparative performance testing against the original R implementation.
 - **Documentation**: Finalize docstrings and user guides.
 
-## 8. Implementation Roadmap (Phase 1)
+## 8. Testing Strategy
 
-1. **Setup Data Directory**: Create `src/pysynthacs/data/`.
-2. **One-time Migration**: Script to convert `.rda` files to `.parquet`.
-3. **Core Interfaces**: Define `PullConfig`, `AcsResult`, and `BasePuller` in `src/pysynthacs/core/`.
-4. **Initial Puller**: Implement `PopulationPuller` and its associated transformation functions.
-5. **Unit Testing**: Add `pytest` cases for `PopulationPuller` using mocked API responses.
+To ensure a reliable migration from R, `pysynthACS` employs a multi-layered testing strategy using `pytest`.
+
+### 8.1. Rust Core Testing (`tests/test_core.py`)
+- **Convergence**: Verify that the simulated annealing engine reaches zero error (`TAE=0`) on perfectly solvable synthetic test cases.
+- **Determinism**: Ensure that providing a fixed `seed` results in bit-identical output across multiple runs.
+- **Scale Stability**: Test behavior on extremely small populations (N=1) and large populations (N=100,000+) to ensure fractional jump logic scales correctly.
+- **Edge Cases**: Validate handling of mismatched dimensions between pool data and target constraints.
+
+### 8.2. ACS Puller & Transformation Testing (`tests/test_population.py`)
+- **Mocked API**: Use `unittest.mock` to simulate Census API responses, allowing tests to run without network access or API keys.
+- **Pure Function Validation**: Individually test the transformation functions (e.g., `transform_age_by_sex`) to verify that R-to-Python column mappings and aggregations are correct.
+- **Standard Error Logic**: Verify the calculation of composite standard errors (`sqrt(sum(se^2))`).
+
+### 8.3. Data Integrity Testing (`tests/test_data_migration.py`)
+- **Parquet Validation**: Ensure all 9+ core datasets migrated from `.rda` are readable and maintain their structural integrity (columns, types).
+
+## 9. Implementation Roadmap (Current Status)
+
+1. **Setup Data Directory**: [DONE]
+2. **One-time Migration**: [DONE]
+3. **Core Interfaces**: [DONE]
+4. **Initial Puller**: [DONE]
+5. **Rust Core Engine**: [DONE]
+6. **Unit Testing (Phase 1 & 2)**: [IN PROGRESS]
+7. **Phase 3 (Data Cubes/xarray)**: [PENDING]
