@@ -1,0 +1,59 @@
+[project]
+name = "pysynthacs"
+version = "0.1.0"
+description = "Synthetic Microdata and Spatial MicroSimulation Modeling for ACS Data in Python"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "censusdis",
+    "pandas",
+    "numpy",
+    "scipy",
+    "tenacity",
+    "tqdm",
+    "plotnine",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "black",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (undefined names, unused imports, etc.)
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear (common bug patterns)
+    "C4",  # flake8-comprehensions (cleaner comprehensions)
+    "UP",  # pyupgrade (modernize Python syntax)
+    "N",   # pep8-naming (naming conventions)
+    "RUF", # Ruff-specific rules
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_generics = true
+warn_return_any = true
