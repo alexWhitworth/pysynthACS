@@ -6,6 +6,7 @@ dist/
 wheels/
 target/
 *.egg-info
+api_key.txt
 
 # Virtual environments
 .venv

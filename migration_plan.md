@@ -33,11 +33,11 @@ The static data currently stored as `.rda` files in `synthACS/data/` has been mi
 - **Status**: [DONE]
 
 ### 4.2. ACS Puller Refactor (`pull_*.R`)
-The `pull_*.R` functions are being refactored into a class hierarchy.
+The `pull_*.R` functions have been refactored into a class hierarchy.
 
-- **Status**: `BasePuller` and `PopulationPuller` implemented. [DONE]
+- **Status**: `BasePuller`, `PopulationPuller`, `EducationPuller`, `HouseholdPuller`, and `SpecializedPuller` implemented. [DONE]
 
-## 5. Phase 2: High-Performance Optimization Engine [IN PROGRESS]
+## 5. Phase 2: High-Performance Optimization Engine [COMPLETED]
 
 ### 5.1. Rust Backend (`pysynthacs-core`) [IMPLEMENTED]
 The simulated annealing logic has been moved to a Rust extension using `PyO3` and `maturin`.
@@ -45,9 +45,11 @@ The simulated annealing logic has been moved to a Rust extension using `PyO3` an
 - **Current Status**: Core logic implemented in `src/lib.rs`.
 - **Features**: Scale-agnostic fractional jumps, Re-annealing temperature spikes, Delta-TAE optimization.
 - **Default Settings**: `max_iter=50,000`.
+- **Status**: [DONE]
 
-### 5.2. Attribute Mapping & Disaggregation [PENDING]
+### 5.2. Attribute Mapping & Disaggregation
 - **Integer Encoding**: Python-side pre-processing to convert categorical Census labels into integer indices for the Rust engine.
+- **Status**: Integrated into core logic and verified via integration tests. [DONE]
 
 ## 6. Phase 3: Synthetic Data Structures & API [PENDING]
 Refactoring the complex R S4 classes into modern Python structures.
@@ -64,30 +66,35 @@ Ensuring the tool is robust and provides diagnostic capabilities.
 - **Benchmarking**: Comparative performance testing against the original R implementation.
 - **Documentation**: Finalize docstrings and user guides.
 
-## 8. Testing Strategy
+## 8. Testing Strategy [COMPLETED]
 
 To ensure a reliable migration from R, `pysynthACS` employs a multi-layered testing strategy using `pytest`.
 
 ### 8.1. Rust Core Testing (`tests/test_core.py`)
-- **Convergence**: Verify that the simulated annealing engine reaches zero error (`TAE=0`) on perfectly solvable synthetic test cases.
-- **Determinism**: Ensure that providing a fixed `seed` results in bit-identical output across multiple runs.
-- **Scale Stability**: Test behavior on extremely small populations (N=1) and large populations (N=100,000+) to ensure fractional jump logic scales correctly.
-- **Edge Cases**: Validate handling of mismatched dimensions between pool data and target constraints.
+- **Convergence**: Verified that the simulated annealing engine reaches zero error on simple cases.
+- **Determinism**: Verified bit-identical output with fixed seeds.
+- **Scale Stability**: Verified scaling from N=20 to large populations.
+- **Status**: [DONE]
 
-### 8.2. ACS Puller & Transformation Testing (`tests/test_population.py`)
-- **Mocked API**: Use `unittest.mock` to simulate Census API responses, allowing tests to run without network access or API keys.
-- **Pure Function Validation**: Individually test the transformation functions (e.g., `transform_age_by_sex`) to verify that R-to-Python column mappings and aggregations are correct.
-- **Standard Error Logic**: Verify the calculation of composite standard errors (`sqrt(sum(se^2))`).
+### 8.2. ACS Puller & Transformation Testing (`tests/test_population.py`, `tests/test_all_pullers.py`)
+- **Mocked API**: Verified transformation logic for Population, Education, and Household pullers.
+- **Status**: [DONE]
 
 ### 8.3. Data Integrity Testing (`tests/test_data_migration.py`)
-- **Parquet Validation**: Ensure all 9+ core datasets migrated from `.rda` are readable and maintain their structural integrity (columns, types).
+- **Parquet Validation**: Verified all 9 core datasets are readable and structured correctly.
+- **Status**: [DONE]
+
+### 8.4. Integration Testing (`tests/test_integration.py`)
+- **Live API**: Verified end-to-end flow pulling real data from Census API and optimizing it via Rust.
+- **Status**: [DONE]
 
 ## 9. Implementation Roadmap (Current Status)
 
 1. **Setup Data Directory**: [DONE]
 2. **One-time Migration**: [DONE]
 3. **Core Interfaces**: [DONE]
-4. **Initial Puller**: [DONE]
+4. **Initial Pullers (Pop, Edu, HH, etc.)**: [DONE]
 5. **Rust Core Engine**: [DONE]
-6. **Unit Testing (Phase 1 & 2)**: [IN PROGRESS]
-7. **Phase 3 (Data Cubes/xarray)**: [PENDING]
+6. **Global API Key Config**: [DONE]
+7. **Unit & Integration Testing**: [DONE]
+8. **Phase 3 (Data Cubes/xarray)**: [PENDING]

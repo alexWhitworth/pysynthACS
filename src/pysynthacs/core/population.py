@@ -5,7 +5,12 @@ from pysynthacs.core.base import BasePuller, AcsResult, PullConfig
 from pysynthacs.transforms.population import (
     transform_age_by_sex, 
     transform_med_age, 
-    transform_pop_by_race
+    transform_pop_by_race,
+    transform_birth_and_lang,
+    transform_marital_status,
+    transform_education_pop,
+    transform_income_pop,
+    transform_poverty_pop
 )
 
 class PopulationPuller(BasePuller):
@@ -30,12 +35,10 @@ class PopulationPuller(BasePuller):
         """
         Processes the population data by splitting into tables and applying transformations.
         """
-        # Dictionary of tables (Estimate and Margin of Error separately)
         estimates_dict = {}
         se_dict = {}
 
         for table in self.config.table_ids:
-            # Table extraction: we expect columns like B01001_001E, B01001_001M...
             est_cols = sorted([c for c in df.columns if c.startswith(table) and c.endswith("E")])
             moe_cols = sorted([c for c in df.columns if c.startswith(table) and c.endswith("M")])
             
@@ -45,14 +48,28 @@ class PopulationPuller(BasePuller):
             est_table = df[est_cols].copy()
             se_table = df[moe_cols].copy() / 1.645
             
-            # Apply specific transformation based on table ID
             if table == "B01001":
                 est_table, se_table = transform_age_by_sex(est_table, se_table)
             elif table == "B01002":
                 est_table, se_table = transform_med_age(est_table, se_table)
             elif table == "B02001":
                 est_table, se_table = transform_pop_by_race(est_table, se_table)
-            # Add other table handlers...
+            elif table == "B06007":
+                est_table, se_table = transform_birth_and_lang(est_table, se_table)
+            elif table == "B06008":
+                est_table, se_table = transform_marital_status(est_table, se_table)
+            elif table == "B06009":
+                est_table, se_table = transform_education_pop(est_table, se_table)
+            elif table == "B06010":
+                est_table, se_table = transform_income_pop(est_table, se_table)
+            elif table == "B06011":
+                # B06011 is median income by place of birth, 
+                # keep as is but rename columns to indicate origin
+                origins = ["all", "us_born_in_state", "us_born_out_state", 
+                           "citizen_born_out_us", "foreign_born"]
+                est_table.columns = se_table.columns = origins
+            elif table == "B06012":
+                est_table, se_table = transform_poverty_pop(est_table, se_table)
             
             table_name = self._get_table_name(table)
             estimates_dict[table_name] = est_table
