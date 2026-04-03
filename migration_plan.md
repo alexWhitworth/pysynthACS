@@ -76,13 +76,13 @@ Ensuring the tool is robust and provides diagnostic capabilities.
   - `simulate_births()` and `simulate_deaths()` logic ported and verified. [DONE]
 - **Benchmarking**: Comparative performance testing against the original R implementation. [DONE]
 
-## 8. Phase 5: JSS Replication & Advanced Examples [IN PROGRESS]
+## 8. Phase 5: JSS Replication & Advanced Examples [COMPLETED]
 Providing a full suite of examples and advanced plotting based on the JSS paper replication code.
 
 - **Key Workflows (examples/)**:
   - `01_basic_workflow.py`: Pulling data for a single county and generating a population. [DONE]
-  - `02_large_scale_optimization.py`: Demonstrating the `SyntheticGenerator` across all tracts in a county. [PENDING]
-  - `03_attribute_augmentation.py`: Adding specialized attributes (e.g., `transit_work`) to a synthetic population. [PENDING]
+  - `02_large_scale_optimization.py`: Demonstrating the `SyntheticGenerator` across all tracts in a county. [DONE]
+  - `03_attribute_augmentation.py`: Adding specialized attributes (e.g., `transit_work`) to a synthetic population. [DONE]
   - `04_demographic_simulation.py`: Simulating births/deaths over multiple iterations. [DONE]
 - **Advanced Plotting**:
   - `plot_spatial_choropleth()`: Mapping births/deaths by census tract using `geopandas`. [DONE]

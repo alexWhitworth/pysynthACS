@@ -48,12 +48,23 @@ synthetic_pop = gen.generate(macro, micro, max_iter=50000)
 print(synthetic_pop.head())
 ```
 
+## Examples
+
+For detailed walkthroughs of `pysynthACS` functionality, see the `examples/` directory:
+
+| Example | Description |
+| :--- | :--- |
+| `01_basic_workflow.py` | Basic end-to-end flow: pulling county data, optimizing, and diagnostics. |
+| `02_large_scale_optimization.py` | Large-scale generation across all census tracts in a county. |
+| `03_attribute_augmentation.py` | Adding specialized conditional attributes (e.g. commute mode) to a population. |
+| `04_demographic_simulation.py` | Stochastic simulation of vital events (births/deaths) over multiple iterations. |
+
 ## Current Status
 - [x] Phase 1: Data Migration & ACS Puller Core (Complete)
 - [x] Phase 2: High-Performance Optimization Engine (Rust/PyO3) (Complete)
 - [x] Phase 3: Synthetic Data Structures & API (xarray integration) (Complete)
 - [x] Phase 4: Validation, Visualization & Simulation (Complete)
-- [ ] Phase 5: JSS Replication & Advanced Examples (In Progress)
+- [x] Phase 5: JSS Replication & Advanced Examples (Complete)
 - [ ] Phase 6: Code Coverage & CI Integration (Pending)
 
 ## Documentation & Testing
