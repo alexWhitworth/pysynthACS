@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union, Tuple
 import pandas as pd
 import numpy as np
 from pysynthacs.core.base import PullConfig
@@ -31,19 +31,17 @@ class SyntheticGenerator:
                  macro: MacroData, 
                  micro: MicroData, 
                  max_iter: int = 50000, 
-                 seed: int = 42) -> pd.DataFrame:
+                 seed: int = 42,
+                 return_diagnostics: bool = False) -> Union[pd.DataFrame, Tuple[pd.DataFrame, Dict[str, AnnealingResult]]]:
         """
         Generates a synthetic population by optimizing the micro pool 
         against the macro constraints.
         """
         # 1. Prepare constraints from MacroData
-        # For now, let's focus on age/gender marginals
         ds = macro.data
-        
-        # Sum over geo to get target counts (assuming single geo for now or handling per geo)
-        # In a real implementation, we would loop over geographies.
         geo_list = macro.geography
         final_populations = []
+        diagnostics = {}
         
         for geo in geo_list:
             # Target age/gender distribution for this geo
@@ -57,8 +55,6 @@ class SyntheticGenerator:
             sample_size = int(target_ds["pop_count"].sum())
             
             # 2. Prepare micro data
-            # Map micro categories to integer indices that match target_counts
-            # (Simplified for now: assume micro.data has a 'category' col 0-47)
             if "category" not in micro.data.columns:
                 raise ValueError("MicroData must contain a 'category' column mapped to Census bins.")
             
@@ -78,5 +74,10 @@ class SyntheticGenerator:
             geo_pop = micro.data.iloc[synthetic_indices].copy()
             geo_pop["geo"] = geo
             final_populations.append(geo_pop)
+            diagnostics[geo] = result
             
-        return pd.concat(final_populations, ignore_index=True)
+        full_pop = pd.concat(final_populations, ignore_index=True)
+        
+        if return_diagnostics:
+            return full_pop, diagnostics
+        return full_pop
