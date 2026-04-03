@@ -14,7 +14,7 @@ This document outlines the architectural plan for migrating the `synthACS` R pac
 - **Data Storage**: `Parquet` (replaces R `.rda` files)
 - **High Performance**: Rust via `PyO3` for simulation logic (replaces Rcpp)
 - **Core Design**: Frozen `dataclasses` for immutable configurations and results.
-- **Testing**: `pytest`
+- **Testing**: `pytest`, `pytest-cov`
 - **Linting/Types**: `ruff`, `mypy`
 
 ## 3. Core Architectural Patterns
@@ -76,27 +76,47 @@ Ensuring the tool is robust and provides diagnostic capabilities.
   - `simulate_births()` and `simulate_deaths()` logic ported and verified. [DONE]
 - **Benchmarking**: Comparative performance testing against the original R implementation. [DONE]
 
-## 8. Testing Strategy [COMPLETED]
+## 8. Phase 5: JSS Replication & Advanced Examples [IN PROGRESS]
+Providing a full suite of examples and advanced plotting based on the JSS paper replication code.
+
+- **Key Workflows (examples/)**:
+  - `01_basic_workflow.py`: Pulling data for a single county and generating a population. [DONE]
+  - `02_large_scale_optimization.py`: Demonstrating the `SyntheticGenerator` across all tracts in a county. [PENDING]
+  - `03_attribute_augmentation.py`: Adding specialized attributes (e.g., `transit_work`) to a synthetic population. [PENDING]
+  - `04_demographic_simulation.py`: Simulating births/deaths over multiple iterations. [DONE]
+- **Advanced Plotting**:
+  - `plot_spatial_choropleth()`: Mapping births/deaths by census tract using `geopandas`. [DONE]
+  - `plot_simulation_quantiles()`: "Fan charts" or boxed whiskers for simulation outcomes. [DONE]
+
+## 9. Phase 6: Code Coverage & CI [PENDING]
+Implementing automated testing oversight and CI/CD integration.
+
+- **Configuration**: Set up `pytest-cov` in `pyproject.toml`.
+- **Enforcement**: Establish an 80% coverage threshold.
+- **CI/CD**: Integrate with GitHub Actions and Codecov for automated reporting.
+- **Rust Coverage**: Investigate `llvm-cov` for memory-safe core logic monitoring.
+
+## 10. Testing Strategy [COMPLETED]
 
 To ensure a reliable migration from R, `pysynthACS` employs a multi-layered testing strategy using `pytest`.
 
-### 8.1. Rust Core Testing (`tests/test_core.py`)
+### 10.1. Rust Core Testing (`tests/test_core.py`)
 - **Status**: Verified convergence, determinism, and scaling. [DONE]
 
-### 8.2. ACS Puller & Transformation Testing (`tests/test_population.py`, `tests/test_all_pullers.py`)
+### 10.2. ACS Puller & Transformation Testing (`tests/test_population.py`, `tests/test_all_pullers.py`)
 - **Status**: Verified transformation logic for Population, Education, and Household pullers. [DONE]
 
-### 8.3. Data Integrity Testing (`tests/test_data_migration.py`)
+### 10.3. Data Integrity Testing (`tests/test_data_migration.py`)
 - **Status**: Verified all 9 core datasets are readable and structured correctly. [DONE]
 
-### 8.4. Integration Testing (`tests/test_integration.py`)
+### 10.4. Integration Testing (`tests/test_integration.py`)
 - **Status**: Verified end-to-end flow with real Census API data. [DONE]
 
-## 9. Performance Estimation & Code Examples
+## 11. Performance Estimation & Code Examples
 
 The transition to Rust for the core simulated annealing algorithm provides significant performance gains over the original R implementation.
 
-### 9.1. Estimated Speedup
+### 11.1. Estimated Speedup
 We estimate a **100x to 1000x speedup** for the optimization phase compared to the original R implementation.
 
 | Aspect | R Implementation | Rust Implementation (`pysynthacs-core`) |
@@ -106,7 +126,7 @@ We estimate a **100x to 1000x speedup** for the optimization phase compared to t
 | **Memory** | High (Copies dataframes each iteration) | Zero-cost (In-place updates, no copying) |
 | **Throughput** | ~10-100 iterations / sec | **~1,000,000+ iterations / sec** |
 
-### 9.2. Code Example: Delta-TAE Logic (Rust)
+### 11.2. Code Example: Delta-TAE Logic (Rust)
 Instead of recalculating the total error for the entire population, Rust only calculates the *change* caused by the swapped individuals.
 
 ```rust
@@ -121,7 +141,7 @@ current_totals[attr][new_cat] += 1;
 new_tae += (current_totals[attr][new_cat] - target[new_cat]).abs();
 ```
 
-### 9.3. Code Example: Modern API (Python)
+### 11.3. Code Example: Modern API (Python)
 The high-level API hides the complexity of data alignment and Rust orchestration.
 
 ```python
@@ -132,7 +152,7 @@ la_males = macro.data.sel(geo="06037", gender="m")
 synthetic_pop = generator.generate(macro, micro, max_iter=50000)
 ```
 
-## 10. Implementation Roadmap (Current Status)
+## 12. Implementation Roadmap (Current Status)
 
 1. **Setup Data Directory**: [DONE]
 2. **One-time Migration**: [DONE]
@@ -143,3 +163,5 @@ synthetic_pop = generator.generate(macro, micro, max_iter=50000)
 7. **Unit & Integration Testing**: [DONE]
 8. **Phase 3 (Data Cubes/xarray)**: [DONE]
 9. **Phase 4 (Validation & Diagnostics)**: [DONE]
+10. **Phase 5 (Advanced Examples & JSS Replication)**: [IN PROGRESS]
+11. **Phase 6 (Code Coverage & CI Integration)**: [PENDING]
