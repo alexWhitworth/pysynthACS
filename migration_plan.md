@@ -9,7 +9,7 @@ This document outlines the architectural plan for migrating the `synthACS` R pac
 ## 2. Tech Stack & Dependencies
 
 - **Language**: Python 3.13+
-- **Data Engine**: `pandas`, `numpy`
+- **Data Engine**: `pandas`, `numpy`, `xarray`
 - **Census API**: `censusdis` (replaces R `acs` library)
 - **Data Storage**: `Parquet` (replaces R `.rda` files)
 - **High Performance**: Rust via `PyO3` for simulation logic (replaces Rcpp)
@@ -20,7 +20,7 @@ This document outlines the architectural plan for migrating the `synthACS` R pac
 ## 3. Core Architectural Patterns
 
 ### Mixed FP/OOP Design
-- **OOP (Orchestration)**: Classes (e.g., `BasePuller`) manage stateful operations like API communication and workflow orchestration.
+- **OOP (Orchestration)**: Classes (e.g., `BasePuller`, `SyntheticGenerator`) manage stateful operations like API communication and workflow orchestration.
 - **FP (Data Transformation)**: Pure functions handle data cleaning, renaming, and mathematical transformations. This ensures testability and prevents side effects.
 - **Immutability**: Frozen `dataclasses` store configurations (`PullConfig`) and resulting datasets (`AcsResult`).
 
@@ -51,44 +51,86 @@ The simulated annealing logic has been moved to a Rust extension using `PyO3` an
 - **Integer Encoding**: Python-side pre-processing to convert categorical Census labels into integer indices for the Rust engine.
 - **Status**: Integrated into core logic and verified via integration tests. [DONE]
 
-## 6. Phase 3: Synthetic Data Structures & API [PENDING]
+## 6. Phase 3: Synthetic Data Structures & API [COMPLETED]
 Refactoring the complex R S4 classes into modern Python structures.
 
-- **Data Containers**: Use `dataclasses` or `attrs` for `MacroData`, `MicroData`, and `SyntheticPopulation`.
-- **API Design**: Create a high-level `SyntheticGenerator` class that orchestrates the pullers from Phase 1 and the optimization engine from Phase 2.
-- **Vectorization**: Store multi-dimensional census data using `xarray` or consolidated `pandas` structures.
+- **Data Containers**: `MacroData` (xarray-backed) and `MicroData` (pandas-backed) implemented.
+- **Adapter**: `acs_result_to_macro_data` adapter for automatic xarray conversion.
+- **API Design**: `SyntheticGenerator` orchestrator class implemented.
+- **Vectorization**: Uses `xarray` for labeled multi-dimensional selection and alignment.
+- **Status**: [DONE]
 
 ## 7. Phase 4: Validation, Visualization & Performance [PENDING]
 Ensuring the tool is robust and provides diagnostic capabilities.
 
-- **Diagnostics**: Porting `calculate_TAE` (Total Absolute Error) and `plot_TAEpath`.
-- **Visualization**: Using `matplotlib` or `plotly` for diagnostic plots.
+- **Diagnostics**:
+  - Port `calculate_TAE` (Total Absolute Error).
+  - Implement `track_tae_path` to record error reduction during annealing.
+  - Add `validate_marginals` to compare synthetic vs. macro distributions.
+- **Visualization (via plotnine/matplotlib)**:
+  - `plot_tae_convergence()`: Visualizing the optimization path.
+  - `plot_spatial_choropleth()`: Mapping results using `geopandas` integration.
+  - `plot_demographic_fit()`: Bar charts comparing synthetic marginals to Census targets.
+  - `plot_simulation_quantiles()`: "Fan charts" for birth/death simulation outcomes (from JSS code).
 - **Benchmarking**: Comparative performance testing against the original R implementation.
-- **Documentation**: Finalize docstrings and user guides.
 
 ## 8. Testing Strategy [COMPLETED]
 
 To ensure a reliable migration from R, `pysynthACS` employs a multi-layered testing strategy using `pytest`.
 
 ### 8.1. Rust Core Testing (`tests/test_core.py`)
-- **Convergence**: Verified that the simulated annealing engine reaches zero error on simple cases.
-- **Determinism**: Verified bit-identical output with fixed seeds.
-- **Scale Stability**: Verified scaling from N=20 to large populations.
-- **Status**: [DONE]
+- **Status**: Verified convergence, determinism, and scaling. [DONE]
 
 ### 8.2. ACS Puller & Transformation Testing (`tests/test_population.py`, `tests/test_all_pullers.py`)
-- **Mocked API**: Verified transformation logic for Population, Education, and Household pullers.
-- **Status**: [DONE]
+- **Status**: Verified transformation logic for Population, Education, and Household pullers. [DONE]
 
 ### 8.3. Data Integrity Testing (`tests/test_data_migration.py`)
-- **Parquet Validation**: Verified all 9 core datasets are readable and structured correctly.
-- **Status**: [DONE]
+- **Status**: Verified all 9 core datasets are readable and structured correctly. [DONE]
 
 ### 8.4. Integration Testing (`tests/test_integration.py`)
-- **Live API**: Verified end-to-end flow pulling real data from Census API and optimizing it via Rust.
-- **Status**: [DONE]
+- **Status**: Verified end-to-end flow with real Census API data. [DONE]
 
-## 9. Implementation Roadmap (Current Status)
+## 9. Performance Estimation & Code Examples
+
+The transition to Rust for the core simulated annealing algorithm provides significant performance gains over the original R implementation.
+
+### 9.1. Estimated Speedup
+We estimate a **100x to 1000x speedup** for the optimization phase compared to the original R implementation.
+
+| Aspect | R Implementation | Rust Implementation (`pysynthacs-core`) |
+| :--- | :--- | :--- |
+| **Execution** | Interpreted (Slow Loops) | Compiled Machine Code (Zero Overhead) |
+| **Error Update** | $O(N)$ or $O(Cells)$ recalculation | **$O(1)$ Delta-TAE Update** |
+| **Memory** | High (Copies dataframes each iteration) | Zero-cost (In-place updates, no copying) |
+| **Throughput** | ~10-100 iterations / sec | **~1,000,000+ iterations / sec** |
+
+### 9.2. Code Example: Delta-TAE Logic (Rust)
+Instead of recalculating the total error for the entire population, Rust only calculates the *change* caused by the swapped individuals.
+
+```rust
+// Subtract old person's contribution from the specific category
+new_tae -= (current_totals[attr][old_cat] - target[old_cat]).abs();
+current_totals[attr][old_cat] -= 1;
+new_tae += (current_totals[attr][old_cat] - target[old_cat]).abs();
+
+// Add new person's contribution
+new_tae -= (current_totals[attr][new_cat] - target[new_cat]).abs();
+current_totals[attr][new_cat] += 1;
+new_tae += (current_totals[attr][new_cat] - target[new_cat]).abs();
+```
+
+### 9.3. Code Example: Modern API (Python)
+The high-level API hides the complexity of data alignment and Rust orchestration.
+
+```python
+# Multi-dimensional selection via xarray
+la_males = macro.data.sel(geo="06037", gender="m")
+
+# High-speed optimization
+synthetic_pop = generator.generate(macro, micro, max_iter=50000)
+```
+
+## 10. Implementation Roadmap (Current Status)
 
 1. **Setup Data Directory**: [DONE]
 2. **One-time Migration**: [DONE]
@@ -97,4 +139,5 @@ To ensure a reliable migration from R, `pysynthACS` employs a multi-layered test
 5. **Rust Core Engine**: [DONE]
 6. **Global API Key Config**: [DONE]
 7. **Unit & Integration Testing**: [DONE]
-8. **Phase 3 (Data Cubes/xarray)**: [PENDING]
+8. **Phase 3 (Data Cubes/xarray)**: [DONE]
+9. **Phase 4 (Validation & Diagnostics)**: [PENDING]

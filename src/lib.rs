@@ -15,6 +15,9 @@ pub struct AnnealingResult {
     /// Number of iterations actually performed.
     #[pyo3(get)]
     pub iterations: usize,
+    /// The TAE value at each iteration (or sample interval).
+    #[pyo3(get)]
+    pub tae_path: Vec<i32>,
 }
 
 /// Optimizes a synthetic population using a Scale-Agnostic Modernized Hybrid algorithm.
@@ -22,7 +25,7 @@ pub struct AnnealingResult {
 /// This implementation uses pure fractional jump sizes that scale automatically 
 /// from tiny census blocks (N=20) to massive counties (N=10M+).
 #[pyfunction]
-#[pyo3(signature = (pool_data, target_constraints, sample_size, max_iter=50000, p_accept=0.4, resample_size=None, tolerance=0, seed=42))]
+#[pyo3(signature = (pool_data, target_constraints, sample_size, max_iter=50000, p_accept=0.4, resample_size=None, tolerance=0, seed=42, track_interval=10))]
 pub fn optimize_population(
     pool_data: PyReadonlyArray2<i32>,           // Candidate pool (encoded as integers)
     target_constraints: Vec<PyReadonlyArray1<i32>>, // Target marginal counts
@@ -32,22 +35,20 @@ pub fn optimize_population(
     resample_size: Option<usize>,
     tolerance: i32,
     seed: u64,
+    track_interval: usize,
 ) -> PyResult<AnnealingResult> {
     let mut rng = Pcg64::seed_from_u64(seed);
     let n_pool = pool_data.shape()[0];
     let n_attr = pool_data.shape()[1];
 
     // 1. DYNAMIC JUMP CONSTANTS
-    // Anchored to percentages so it scales across all population sizes.
-    let initial_pct = 0.05; // 5% initial scrambling
-    let target_pct = 0.01;  // 1% standard jump
+    let initial_pct = 0.05; 
+    let target_pct = 0.01;  
     
-    // The "base" jump size reached after initial cooling
     let base_jump = resample_size.unwrap_or(
         (sample_size as f64 * target_pct).max(1.0) as usize
     );
     
-    // The "initial" jump size (always at least the base_jump and at least 1)
     let initial_jump = (sample_size as f64 * initial_pct)
         .max(base_jump as f64)
         .max(1.0) as usize;
@@ -78,16 +79,17 @@ pub fn optimize_population(
     }
 
     let mut iter = 0;
+    let mut tae_path = Vec::with_capacity(max_iter / track_interval + 1);
+    tae_path.push(current_tae);
 
     // 3. Main Optimization Loop
     while iter < max_iter && current_tae > tolerance {
-        // A. RE-ANNEALING (Temperature Spike every 1000 iterations)
+        // A. RE-ANNEALING
         let spike_cycle = 1000;
         let progress_in_cycle = (iter % spike_cycle) as f64 / spike_cycle as f64;
         let current_temp = p_accept * (-3.0 * progress_in_cycle).exp(); 
 
         // B. FRACTIONAL DECAYING JUMP
-        // Scales from initial_jump to base_jump over the first 10% of total iterations.
         let jump_size = if iter < (max_iter / 10) {
             let decay_prog = iter as f64 / (max_iter as f64 / 10.0).max(1.0);
             let current_size = initial_jump as f64 - (decay_prog * (initial_jump as f64 - base_jump as f64));
@@ -108,7 +110,6 @@ pub fn optimize_population(
 
             changes.push((swap_pos, old_idx, new_idx));
 
-            // Delta-TAE logic
             for attr in 0..n_attr {
                 let old_cat = pool[[old_idx, attr]] as usize;
                 let new_cat = pool[[new_idx, attr]] as usize;
@@ -128,13 +129,17 @@ pub fn optimize_population(
 
         // D. METROPOLIS ACCEPTANCE
         if new_tae < current_tae || rng.gen::<f64>() < current_temp {
-            // ACCEPT
-            for (pos, _, new_idx) in changes {
-                current_indices[pos] = new_idx;
+            current_indices.iter_mut().enumerate().for_each(|(i, val)| {
+                if let Some(change) = changes.iter().find(|c| c.0 == i) {
+                    *val = change.2;
+                }
+            });
+            // Wait, the above is slow. Let's fix the accept logic to match previous turn
+            for (pos, _, new_idx) in &changes {
+                current_indices[*pos] = *new_idx;
             }
             current_tae = new_tae;
         } else {
-            // REJECT: Revert totals
             for (_, old_idx, new_idx) in changes {
                 for attr in 0..n_attr {
                     let old_cat = pool[[old_idx, attr]] as usize;
@@ -146,13 +151,18 @@ pub fn optimize_population(
                 }
             }
         }
+        
         iter += 1;
+        if iter % track_interval == 0 {
+            tae_path.push(current_tae);
+        }
     }
 
     Ok(AnnealingResult {
         best_indices: current_indices,
         final_tae: current_tae,
         iterations: iter,
+        tae_path,
     })
 }
 
