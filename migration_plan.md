@@ -60,19 +60,21 @@ Refactoring the complex R S4 classes into modern Python structures.
 - **Vectorization**: Uses `xarray` for labeled multi-dimensional selection and alignment.
 - **Status**: [DONE]
 
-## 7. Phase 4: Validation, Visualization & Performance [PENDING]
+## 7. Phase 4: Validation, Visualization & Performance [COMPLETED]
 Ensuring the tool is robust and provides diagnostic capabilities.
 
 - **Diagnostics**:
-  - Port `calculate_TAE` (Total Absolute Error).
-  - Implement `track_tae_path` to record error reduction during annealing.
-  - Add `validate_marginals` to compare synthetic vs. macro distributions.
+  - Port `calculate_TAE` (Total Absolute Error). [DONE]
+  - Implement `track_tae_path` to record error reduction during annealing. [DONE]
+  - Add `validate_marginals` to compare synthetic vs. macro distributions. [DONE]
 - **Visualization (via plotnine/matplotlib)**:
-  - `plot_tae_convergence()`: Visualizing the optimization path.
-  - `plot_spatial_choropleth()`: Mapping results using `geopandas` integration.
-  - `plot_demographic_fit()`: Bar charts comparing synthetic marginals to Census targets.
-  - `plot_simulation_quantiles()`: "Fan charts" for birth/death simulation outcomes (from JSS code).
-- **Benchmarking**: Comparative performance testing against the original R implementation.
+  - `plot_tae_convergence()`: Visualizing the optimization path. [DONE]
+  - `plot_spatial_choropleth()`: Mapping results using `geopandas` integration. [DONE]
+  - `plot_demographic_fit()`: Bar charts comparing synthetic marginals to Census targets. [DONE]
+  - `plot_simulation_quantiles()`: "Fan charts" for birth/death simulation outcomes. [DONE]
+- **Simulation Engine**:
+  - `simulate_births()` and `simulate_deaths()` logic ported and verified. [DONE]
+- **Benchmarking**: Comparative performance testing against the original R implementation. [DONE]
 
 ## 8. Testing Strategy [COMPLETED]
 
@@ -140,4 +142,4 @@ synthetic_pop = generator.generate(macro, micro, max_iter=50000)
 6. **Global API Key Config**: [DONE]
 7. **Unit & Integration Testing**: [DONE]
 8. **Phase 3 (Data Cubes/xarray)**: [DONE]
-9. **Phase 4 (Validation & Diagnostics)**: [PENDING]
+9. **Phase 4 (Validation & Diagnostics)**: [DONE]
