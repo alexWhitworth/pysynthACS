@@ -16,7 +16,7 @@ Python version of the `synthACS` R package. Modernized with `pandas`, `censusdis
   - **Vectorized Operations**: Perform fast aggregations across specific demographic dimensions.
 - **Immutable Data Structures**: Utilizes frozen Python dataclasses for robust configuration and result management.
 - **Global Configuration**: Easy API key management with `set_api_key()`.
-- **Comprehensive Testing**: Full suite of unit, integration, and performance tests (100% pass rate).
+- **Comprehensive Testing & CI**: Full suite of unit, integration, and performance tests with automated coverage reporting.
 
 ## Installation
 
@@ -65,7 +65,7 @@ For detailed walkthroughs of `pysynthACS` functionality, see the `examples/` dir
 - [x] Phase 3: Synthetic Data Structures & API (xarray integration) (Complete)
 - [x] Phase 4: Validation, Visualization & Simulation (Complete)
 - [x] Phase 5: JSS Replication & Advanced Examples (Complete)
-- [ ] Phase 6: Code Coverage & CI Integration (Pending)
+- [x] Phase 6: Code Coverage & CI Integration (Complete)
 
 ## Documentation & Testing
 To run the tests:

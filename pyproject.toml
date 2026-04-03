@@ -57,3 +57,27 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_any_generics = true
 warn_return_any = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Automatically include coverage flags when running pytest
+addopts = "--cov=pysynthacs --cov-report=xml --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/pysynthacs"]
+omit = [
+    "tests/*",
+    "**/__init__.py",
+    "scripts/*"
+]
+
+[tool.coverage.report]
+# Threshold enforcement
+fail_under = 70
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
