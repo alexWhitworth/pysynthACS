@@ -25,6 +25,10 @@ Python version of the `synthACS` R package. Modernized with `pandas`, `censusdis
 uv pip install .
 ```
 
+#### Census API Key
+
+- Requires an API key. Get yours [here](https://api.census.gov/data/key_signup.html)
+
 ## Quick Start
 
 ```python
