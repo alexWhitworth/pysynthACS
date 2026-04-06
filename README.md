@@ -20,10 +20,11 @@ Python version of the `synthACS` R package. Modernized with `pandas`, `censusdis
 
 ## Installation
 
+`pysynthACS` requires **Python 3.13**.
+
 ```bash
-# Clone and install using uv (recommended)
-uv pip install .
-```
+# Install from PyPI
+uv pip install pysynthacs
 
 #### Census API Key
 
