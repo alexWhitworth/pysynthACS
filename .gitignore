@@ -1,12 +1,19 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+wheels/
+api_key.txt
+.coverage
+.pytest_cache/
+
+# Rust
+target/
+Cargo.lock
+
+# Build
 build/
 dist/
-wheels/
-target/
 *.egg-info
-api_key.txt
 
 # Virtual environments
 .venv
