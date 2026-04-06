@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/pysynthacs.svg)](https://badge.fury.io/py/pysynthacs)
+
 # pysynthACS
 
 Python version of the `synthACS` R package. Modernized with `pandas`, `censusdis`, `xarray`, and `Rust`.
