@@ -27,6 +27,7 @@ Python version of the `synthACS` R package. Modernized with `pandas`, `censusdis
 ```bash
 # Install from PyPI
 uv pip install pysynthacs
+```
 
 #### Census API Key
 
