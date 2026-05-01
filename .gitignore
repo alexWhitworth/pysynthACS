@@ -17,3 +17,7 @@ dist/
 
 # Virtual environments
 .venv
+
+# code cov
+.coverage
+coverage.xml
