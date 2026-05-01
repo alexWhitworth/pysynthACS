@@ -19,6 +19,6 @@ dist/
 .venv
 
 # code cov
-coverage_plan.md
+codecov_plan.md
 .coverage
 coverage.xml
