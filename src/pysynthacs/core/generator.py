@@ -5,7 +5,7 @@ from pysynthacs.core.base import PullConfig
 from pysynthacs.core.population import PopulationPuller
 from pysynthacs.core.adapter import acs_result_to_macro_data
 from pysynthacs.core.data import MacroData, MicroData
-from pysynthacs_core import optimize_population, AnnealingResult
+from pysynthacs.pysynthacs_core import optimize_population, AnnealingResult
 
 class SyntheticGenerator:
     """

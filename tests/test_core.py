@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from pysynthacs_core import optimize_population
+from pysynthacs.pysynthacs_core import optimize_population
 
 def test_convergence_tiny_population():
     """Test that a tiny population (N=20) can reach zero error."""
