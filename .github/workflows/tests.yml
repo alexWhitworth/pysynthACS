@@ -9,6 +9,10 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Needed by codecov/codecov-action's OIDC flow (no static upload token).
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,9 +69,11 @@ jobs:
         run: coverage report
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: alexWhitworth/pysynthACS
-          file: ./coverage.xml
+          # Authenticate via GitHub OIDC instead of a static CODECOV_TOKEN
+          # secret. This satisfies Codecov's protected-branch token
+          # requirement without needing a repository secret.
+          use_oidc: true
+          files: ./coverage.xml
           fail_ci_if_error: true
