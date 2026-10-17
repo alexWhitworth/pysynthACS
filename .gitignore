@@ -14,6 +14,7 @@ Cargo.lock
 build/
 dist/
 *.egg-info
+*.so
 
 # Virtual environments
 .venv

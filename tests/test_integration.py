@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from pysynthacs.core.population import PopulationPuller
-from pysynthacs_core import optimize_population
+from pysynthacs.pysynthacs_core import optimize_population
 
 @pytest.mark.integration
 def test_live_census_pull_and_optimize():

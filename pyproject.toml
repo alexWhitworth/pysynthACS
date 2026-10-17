@@ -12,6 +12,7 @@ dependencies = [
     "tenacity",
     "tqdm",
     "plotnine",
+    "xarray",
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -27,11 +28,16 @@ dev = [
     "ruff",
     "mypy",
     "black",
+    "diff-cover",
 ]
 
 [build-system]
 requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
+
+[tool.maturin]
+python-source = "src"
+module-name = "pysynthacs.pysynthacs_core"
 
 [tool.ruff]
 line-length = 100
@@ -74,12 +80,13 @@ source = ["src/pysynthacs"]
 omit = [
     "tests/*",
     "**/__init__.py",
-    "scripts/*"
+    "scripts/*",
+    "src/pysynthacs/viz/plotting.py",
 ]
 
 [tool.coverage.report]
 # Threshold enforcement
-fail_under = 70
+fail_under = 85
 show_missing = true
 exclude_lines = [
     "pragma: no cover",
