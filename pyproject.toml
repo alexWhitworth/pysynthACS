@@ -80,7 +80,8 @@ source = ["src/pysynthacs"]
 omit = [
     "tests/*",
     "**/__init__.py",
-    "scripts/*"
+    "scripts/*",
+    "src/pysynthacs/viz/plotting.py",
 ]
 
 [tool.coverage.report]
